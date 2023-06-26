@@ -247,4 +247,4 @@ VP_STMicroelectronics.X-CUBE-MEMS1_VS_BoardOoComponentJjMEMS_7.0.0.Signal=STMicr
 VP_SYS_VS_tim1.Mode=TIM1
 VP_SYS_VS_tim1.Signal=SYS_VS_tim1
 board=custom
-isbadioc=true
+isbadioc=false

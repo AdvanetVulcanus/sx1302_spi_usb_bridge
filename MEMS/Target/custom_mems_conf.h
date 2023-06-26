@@ -4,11 +4,11 @@
  * @author  MEMS Application Team
  * @version V7.0.0
  * @date    24-June-2019
- * @brief   This file contains definitions of the MEMS components bus interfaces for custom boards 
+ * @brief   This file contains definitions of the MEMS components bus interfaces for custom boards
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2023 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,

@@ -72,8 +72,17 @@ void Error_Handler(void);
 #define SX1261_DIO1_GPIO_Port GPIOB
 #define SX1261_RESET_Pin GPIO_PIN_8
 #define SX1261_RESET_GPIO_Port GPIOA
-#define PPS_Pin GPIO_PIN_4
-#define PPS_GPIO_Port GPIOB
+#define W5500_INTn_Pin GPIO_PIN_12
+#define W5500_INTn_GPIO_Port GPIOA
+#define W5500_CSn_Pin GPIO_PIN_15
+#define W5500_CSn_GPIO_Port GPIOA
+#define SX1302_GPIO_8_Pin GPIO_PIN_3
+#define SX1302_GPIO_8_GPIO_Port GPIOB
+#define W5500_RSTn_Pin GPIO_PIN_4
+#define W5500_RSTn_GPIO_Port GPIOB
+#define LED_1_Pin GPIO_PIN_5
+#define LED_1_GPIO_Port GPIOB
+
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
@@ -83,5 +92,3 @@ void Error_Handler(void);
 #endif
 
 #endif /* __MAIN_H */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
