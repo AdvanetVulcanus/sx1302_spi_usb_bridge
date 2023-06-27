@@ -130,7 +130,7 @@ int8_t socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag)
       default :
          return SOCKERR_SOCKMODE;
 	}
-	//M20150601 : For SF_TCP_ALIGN & W5300
+	//M20150601 : For SF_TCP_ALIGN & W5300F
 	//if((flag & 0x06) != 0) return SOCKERR_SOCKFLAG;
 	if((flag & 0x04) != 0) return SOCKERR_SOCKFLAG;
 #if _WIZCHIP_ == 5200
