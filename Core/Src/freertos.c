@@ -129,7 +129,6 @@ void MX_FREERTOS_Init(void) {
 			  break;
 		  }
 	  	}
-
   /* USER CODE END Init */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -178,7 +177,6 @@ void recieveFromBridge(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	recieve_from_bridge(bridge_connection);
     osDelay(1);
   }
   /* USER CODE END recieveFromBridge */
@@ -197,7 +195,6 @@ void sendToBridge(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	send_to_bridge(bridge_connection);
     osDelay(1);
   }
   /* USER CODE END sendToBridge */

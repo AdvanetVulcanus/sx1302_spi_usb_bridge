@@ -41,7 +41,7 @@
 #include "Project/COM/com_usb.h"
 #include "usbd_cdc_if.h"
 #include "usb_device.h"
-
+#include "ethernet_poc.h"
 /* -------------------------------------------------------------------------- */
 /* --- CONSTANTS, TYPES, ENUMS & STRUCTS ------------------------------------ */
 #define MAX_SIZE_BUFFER_PROCESS ( 64 )
@@ -68,10 +68,24 @@ static uint8_t           tx_buffer[MAX_SIZE_COMMAND];
  */
 void com_rx__start_task( void* argument )
 {
-    UNUSED( argument );
 
-    // Init USB init
-    MX_USB_DEVICE_Init( );
+
+    UNUSED( argument );
+    int32_t socket_result;
+   	uint8_t socket_number = 0; 		// Set up socket number to use
+   	uint16_t port = 1234; 			// PORT to connect to
+   	uint8_t bridge_ip[4] = {0,0,0,0}; // IP to connect to
+   	socket_str_t bridge_connection;
+   	BaseType_t xStatus;
+   	const TickType_t xTicksToWait = pdMS_TO_TICKS( 100 );
+   	xStatus = xQueueReceive( xQueue, &bridge_connection, xTicksToWait );
+
+   	if( xStatus != pdPASS )
+   	 {
+      	 // Init USB init
+      	 brigde_connection = socket_factory(socket_number, bridge_ip, port);
+      	 ETHERNET_SOCKET_Init(brigde_connection);
+   	 }
 
     uint8_t    buffer[MAX_SIZE_BUFFER_PROCESS];
     TickType_t read_wait;
@@ -83,9 +97,10 @@ void com_rx__start_task( void* argument )
         // Inifinite wait if no frame is pending, wait 100ms for timeout if frame is pending
         read_wait = ( is_new_frame == false ) ? pdMS_TO_TICKS( DELAY_TIME_OUT_COM ) : portMAX_DELAY;
 
-        size_rx =
-            ( uint16_t ) xStreamBufferReceive( g_streambuffer_com_rx, buffer, MAX_SIZE_BUFFER_PROCESS, read_wait );
+       // size_rx =
+       //     ( uint16_t ) xStreamBufferReceive( g_streambuffer_com_rx, buffer, MAX_SIZE_BUFFER_PROCESS, read_wait );
 
+        size_rx = recieve_from_bridge(&brigde_connection);
         if( size_rx == 0 )
         {
             // Time out on read car
@@ -93,7 +108,7 @@ void com_rx__start_task( void* argument )
         }
         else
         {
-            if( com_usb__process_buffer( is_new_frame, buffer, size_rx ) == true )
+            if( eth_usb__process_buffer( is_new_frame, brigde_connection->buffer, size_rx ) == true )
             {
                 is_new_frame = true;
             }
@@ -118,6 +133,13 @@ void com_tx__start_task( void* argument )
     task_com_tx_handle = xTaskGetCurrentTaskHandle( );
     sema_com_tx        = xSemaphoreCreateMutexStatic( &mutex_buffer_com_tx );
 
+     int32_t socket_result;
+
+     socket_str_t bridge_connection;
+     BaseType_t xStatus;
+     const TickType_t xTicksToWait = pdMS_TO_TICKS( 100 );
+     xStatus = xQueueReceive( xQueue, &bridge_connection, xTicksToWait );
+
     uint16_t   size_packet;
     uint16_t   size_buffer;
     TickType_t delay;
@@ -139,20 +161,21 @@ void com_tx__start_task( void* argument )
         if( size_buffer != 0 )
         {
             // Transmit USB buffer
-            if( CDC_Transmit_FS( tx_buffer, size_buffer ) != USBD_OK )
-            {
+			send_to_bridge(&brigde_connection);
+           // if( CDC_Transmit_FS( tx_buffer, size_buffer ) != USBD_OK ) //I have to set here the socket to send wathever to the bridge
+           // {
                 // USB com tx should be free by design
-                Error_Handler( );
-            }
+             //   Error_Handler( );
+            //}
 
             // Wait notif from USB complete interrupt (max block is < 1ms)
             // The delay is set to 250ms because the host may be busy.
             // It is not an issue because the host will not send an other command before reading this answer.
-            if( ulTaskNotifyTake( pdTRUE, pdMS_TO_TICKS( 250 ) ) != pdTRUE )
-            {
+            //if( ulTaskNotifyTake( pdTRUE, pdMS_TO_TICKS( 250 ) ) != pdTRUE )
+            //{
                 // USB com tx should not take as much time!
-                Error_Handler( );
-            }
+              //  Error_Handler( );
+            //}
         }
     }
 }

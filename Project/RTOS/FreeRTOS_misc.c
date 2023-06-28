@@ -40,7 +40,7 @@
 #include "Project/RTOS/Task/com_task.h"
 #include "Project/RTOS/Task/temperature_task.h"
 #include "Project/COM/com_usb_msg_def.h"
-
+#include "ethernet_poc.h"
 /* -------------------------------------------------------------------------- */
 /* --- CONSTANTS, TYPES, ENUMS & STRUCTS ------------------------------------ */
 #define TASK_PRIORITY__COM_TX ( 6 )
@@ -67,6 +67,9 @@ MessageBufferHandle_t g_msgbuffer_com_tx;
 static StaticStreamBuffer_t  streambuffer_mgt_com_rx;
 static StaticMessageBuffer_t msgbuffer_mgt_com_tx;
 
+QueueHandle_t xQueue;
+
+
 static uint8_t streambuffer_buffer_com_rx[STREAMBUFFER_SIZE__COM_RX];
 static uint8_t msgbuffer_buffer_com_tx[MSGBUFFER_SIZE__COM_TX];
 
@@ -92,6 +95,9 @@ static StackType_t stack_temperature[STACK_SIZE__TEMPERATURE];
  */
 void freertos__init( void )
 {
+
+	xQueue = xQueueCreate(1, sizeof( socket_str_t ) );
+
     // Create buffer message
     g_streambuffer_com_rx =
         xStreamBufferCreateStatic( STREAMBUFFER_SIZE__COM_RX, 1, streambuffer_buffer_com_rx, &streambuffer_mgt_com_rx );
@@ -110,12 +116,13 @@ void freertos__init( void )
     task_status = xTaskCreateStatic( com_tx__start_task, "COM_TX", STACK_SIZE__COM_TX, NULL, TASK_PRIORITY__COM_TX,
                                      stack_radio_com_tx, &task_buffer_radio_com_tx );
 
-    assert_param( task_status != NULL );
-
     task_status = xTaskCreateStatic( temperature_task__start, "TEMPERATURE", STACK_SIZE__TEMPERATURE, NULL,
-                                     TASK_PRIORITY__TEMPERATURE, stack_temperature, &task_buffer_temperature );
+                                         TASK_PRIORITY__TEMPERATURE, stack_temperature, &task_buffer_temperature );
 
+        assert_param( task_status != NULL );
     assert_param( task_status != NULL );
+
+
 
     vTaskStartScheduler( );
 }
