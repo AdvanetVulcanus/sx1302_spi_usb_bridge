@@ -22,6 +22,9 @@
 #include "spi.h"
 #include "usart.h"
 #include "gpio.h"
+#include "w5500_spi.h"
+#include "wizchip_conf.h"
+#include "socket.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
