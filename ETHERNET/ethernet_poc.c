@@ -10,14 +10,17 @@
  *
  */
 
-socket_str_t* socket_factory(uint8_t socket_number, uint8_t buf, uint16_t port)
+socket_str_t* socket_factory(uint8_t socket_number, uint8_t* bridgeip, uint16_t port)
 {
     socket_str_t *socket_obj;
     socket_obj = (socket_str_t *)malloc(sizeof(socket_obj));
-
     socket_obj->buffer = (uint8_t *)malloc(sizeof(uint8_t));
     socket_obj->socket_number = socket_number;
     socket_obj->bridge_port = port;
+    socket_obj ->ip[0] = bridgeip[0];
+    socket_obj ->ip[1] = bridgeip[1];
+    socket_obj ->ip[2] = bridgeip[2];
+    socket_obj ->ip[3] = bridgeip[3];
 
     return socket_obj;
 }
@@ -43,9 +46,9 @@ void socket_destructor(socket_str_t *socket_obj)
  *
  */
 
-void ETHERNET_SOCKET_Init(socket_str_t *socket_obj)
+uint8_t ETHERNET_SOCKET_Init(socket_str_t *socket_obj)
 {
-    socket(socket_obj->socket_number, Sn_MR_TCP, socket_obj->bridge_port, 0x0); // Creating socket
+    return socket(socket_obj->socket_number, Sn_MR_TCP, socket_obj->bridge_port, 0x0); // Creating socket
 }
 
 /**

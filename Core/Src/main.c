@@ -31,6 +31,7 @@
 #include "Project/RTOS/FreeRTOS_misc.h"
 #include "Project/device.h"
 #include "Project/global.h"
+#include "ethernet_poc.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -63,7 +64,20 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+wiz_NetInfo gWIZNETINFO2 = { // Board network parameters and configs
+		.mac = {0x00,0x08,0xdc,0xab,0xcd,0xef},
+		.ip = {192,168,1,112}, //IP of the board
+		.sn = {255,255,255,0},
+		.gw = {192,168,1,1},
+		.dns = {8,8,8,8},
+		.dhcp = NETINFO_STATIC
+};
+
+
+
+
 /* USER CODE END 0 */
+
 
 /**
   * @brief  The application entry point.
@@ -98,8 +112,62 @@ int main(void)
   /* USER CODE BEGIN 2 */
   device__init();
   freertos__init();
-  /* USER CODE END 2 */
+  W5500Init(); //Important: INITIALIZING THE W5500 CHIP in theory we can start using it
 
+
+  int32_t socket_result;
+  uint8_t socket_number = 0; 		// Set up socket number to use
+  uint16_t port = 1234; 			// PORT to connect to
+  uint8_t bridge_ip[4] = {0,0,0,0}; // IP to connect to
+  socket_str_t* bridge_connection;
+  brigde_connection = socket_factory(socket_number, bridge_ip, port);
+
+  printf('**********************************************\r\n');
+  printf('Initializing socket connection with the bridge\r\n');
+  printf('**********************************************\r\n');
+
+  socket_result = ETHERNET_SOCKET_Init(brigde_connection);
+  switch(ETHERNET_SOCKET_Init(brigde_connection))
+  {
+  case SOCKERR_SOCKNUM:
+	  printf('xxxxxxxxxxxxxxxxxxxxx\r\n');
+	  printf('Invalid socket number\r\n');
+	  printf('xxxxxxxxxxxxxxxxxxxxx\r\n');
+	  exit -1;
+  case SOCKERR_SOCKMODE:
+	  printf('xxxxxxxxxxxxxxxxxx\r\n');
+	  printf('Mode not supported\r\n');
+	  printf('xxxxxxxxxxxxxxxxxx\r\n');
+	  exit -1;
+  case SOCKERR_SOCKFLAG:
+	  printf('xxxxxxxxxxxxxxxxxxxxx\r\n');
+	  printf('Socket flag not valid\r\n');
+	  printf('xxxxxxxxxxxxxxxxxxxxx\r\n');
+	  exit -1;
+  }
+
+	printf('**************\r\n');
+	printf('Socket created\r\n');
+	printf('**************\r\n');
+
+
+  for(uint_16_t i=0;i<10;i++)
+  	{
+	  printf('*********************\r\n');
+	  printf('Connecting to bridge \r\n');
+	  printf('Attempting to connect %d \r\n', i);
+	  printf('*********************\r\n');
+	  socket_result = establish_connection_with_bridge(brigde_connection);
+	  if(socket_result){
+		  printf('***********\r\n');
+		  printf('Connected! \r\n');
+		  printf('***********\r\n');
+		  break;
+	  }
+  	}
+
+
+  /* USER CODE END 2 */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)

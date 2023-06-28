@@ -18,10 +18,17 @@ typedef struct socket_str
     uint16_t bridge_port;
 } socket_str_t;
 
-void ETHERNET_SOCKET_Init(void)
-int32_t send_to_bridge(uint8_t *buf)
-int32_t receive_from_bridge(uint8_t *buf)
-establish_connection_with_bridge()
+
+void socket_destructor(socket_str_t *socket_obj);
+void wiz_send_data(uint8_t sn, uint8_t *wizdata, uint16_t len);
+
+
+uint8_t ETHERNET_SOCKET_Init(socket_str_t *socket_obj);
+int32_t establish_connection_with_bridge(socket_str_t *socket_obj);
+int32_t recieve_from_bridge(socket_str_t *socket_obj);
+int32_t send_to_bridge(socket_str_t *socket_obj);
+socket_str_t* socket_factory(uint8_t socket_number, uint8_t* bridgeip, uint16_t port);
+
 
 #ifdef __cplusplus
 }

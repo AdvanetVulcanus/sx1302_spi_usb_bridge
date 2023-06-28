@@ -54,6 +54,7 @@
 //#include <stdio.h>
 #include "w5500.h"
 
+
 #define _W5500_SPI_VDM_OP_          0x00
 #define _W5500_SPI_FDM_OP_LEN1_     0x01
 #define _W5500_SPI_FDM_OP_LEN2_     0x02
