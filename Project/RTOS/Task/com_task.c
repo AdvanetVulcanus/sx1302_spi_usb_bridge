@@ -82,7 +82,7 @@ void com_rx__start_task( void* argument )
 
    	if( xStatus != pdPASS )
    	 {
-      	 // Init USB init
+      	 // Init socket init
       	 brigde_connection = socket_factory(socket_number, bridge_ip, port);
       	 ETHERNET_SOCKET_Init(brigde_connection);
    	 }
@@ -97,10 +97,8 @@ void com_rx__start_task( void* argument )
         // Inifinite wait if no frame is pending, wait 100ms for timeout if frame is pending
         read_wait = ( is_new_frame == false ) ? pdMS_TO_TICKS( DELAY_TIME_OUT_COM ) : portMAX_DELAY;
 
-       // size_rx =
-       //     ( uint16_t ) xStreamBufferReceive( g_streambuffer_com_rx, buffer, MAX_SIZE_BUFFER_PROCESS, read_wait );
-
         size_rx = recieve_from_bridge(&brigde_connection);
+
         if( size_rx == 0 )
         {
             // Time out on read car
@@ -111,6 +109,8 @@ void com_rx__start_task( void* argument )
             if( eth_usb__process_buffer( is_new_frame, brigde_connection->buffer, size_rx ) == true )
             {
                 is_new_frame = true;
+                xQueueSend( xQueue, &bridge_connection, xTicksToWait );
+
             }
             else
             {
@@ -122,7 +122,7 @@ void com_rx__start_task( void* argument )
 }
 
 /**
- * @brief Start TX task: manage TX packet over USB
+ * @brief Start TX task: manage TX packet over socket
  *
  * @param argument
  */
@@ -138,7 +138,7 @@ void com_tx__start_task( void* argument )
      socket_str_t bridge_connection;
      BaseType_t xStatus;
      const TickType_t xTicksToWait = pdMS_TO_TICKS( 100 );
-     xStatus = xQueueReceive( xQueue, &bridge_connection, xTicksToWait );
+     xStatus = xQueueReceive( xQueue, &bridge_connection, xTicksToWait ); //Get the connection struct
 
     uint16_t   size_packet;
     uint16_t   size_buffer;
@@ -152,7 +152,7 @@ void com_tx__start_task( void* argument )
         do
         {
             size_packet = ( uint16_t ) xMessageBufferReceive( g_msgbuffer_com_tx, tx_buffer + size_buffer,
-                                                              MAX_SIZE_COMMAND - size_buffer, delay );
+                                                              MAX_SIZE_COMMAND - size_buffer, delay ); // gets the message from the com_tx__post_message function
             // Read as much data as possible without delay (better perf on big packet !)
             delay = 0;
             size_buffer += size_packet;
@@ -160,22 +160,13 @@ void com_tx__start_task( void* argument )
 
         if( size_buffer != 0 )
         {
+        	brigde_connection->buffer = tx_buffer;
             // Transmit USB buffer
 			send_to_bridge(&brigde_connection);
-           // if( CDC_Transmit_FS( tx_buffer, size_buffer ) != USBD_OK ) //I have to set here the socket to send wathever to the bridge
-           // {
-                // USB com tx should be free by design
-             //   Error_Handler( );
-            //}
+			free(bridge_connection->buffer); // free buffer of connection
+			xQueueSend( xQueue, &bridge_connection, xTicksToWait );
 
-            // Wait notif from USB complete interrupt (max block is < 1ms)
-            // The delay is set to 250ms because the host may be busy.
-            // It is not an issue because the host will not send an other command before reading this answer.
-            //if( ulTaskNotifyTake( pdTRUE, pdMS_TO_TICKS( 250 ) ) != pdTRUE )
-            //{
-                // USB com tx should not take as much time!
-              //  Error_Handler( );
-            //}
+
         }
     }
 }
